@@ -9,9 +9,400 @@
 
 ## English
  
-### Used technology: JAVASCRIPT, HTML, CSS
+## Used technology: Node
 
 ## Abstract
+
+We will use Express.js to create a virtual store project with products, categories, etc.
+
+What is Express.js?
+It is a microframework that runs on Node.
+
+## **Initial configuration**
+We start with npm init, git init, and then create the .gitignore, .editorconfig, and .eslintrc.json files. These last two are configuration files.
+
+We also create the index.js file.
+
+**gitignore**: we will use the website gitignore.io, which allows us to choose the environment, in this case, NODE, and also select the operating systems (Windows, Linux, macOS) that should not be tracked.
+
+**editorconfig**: this file is recommended so that all developers have the same editor configuration. To use the plugin, we install the EditorConfig for VS Code extension in VSC. We have a given configuration that we will use so that everyone can work in the same way. We copy it into this file.
+
+**.eslintrc.json**: this file is used to configure linters or code formatting for good practices. As in the previous case, we are given a configuration to work with the same format.
+
+**package.json**: we will modify it by adding some scripts. We add dev, which we will use to start a development environment, which we will do with -nodemon index.js-. We also add start with -node index.js-. We can also run our linter, which ensures that we follow good practices -eslint-.
+
+To make all this work, we need to install some development dependencies:
+
+```bash
+npm i nodemon eslint eslint-config-prettier eslint-plugin-prettier prettier -D 
+```
+To test that **nodemon** is running, we use the command that we had added in package.json:
+
+```bash
+npm run dev
+```
+Then to run in **production mode**, we use:
+
+```bash
+npm run start
+```
+
+## **Installation of Express.js and first HTTP server** 
+
+We will install Express.js from the terminal as a production dependency, which is different from development dependencies.
+
+```bash
+npm i express
+```
+If we go to package.json, we can see that the express dependency was created.
+
+Next, we start working with the **index.js** file. First, we create a constant where we require Express. We create an application by calling the express() method or constructor. Then, we specify the port number where we want the application to run.
+
+We then define a route using the get('/') method. Inside the get() method, we have a callback, which will be the response we send to our clients. Inside the callback, we have two parameters, the request and the response. We send the desired response message in the response object.
+
+We also need to specify that the application listens on the designated port. We can also use a callback to send a console.log when it is running. To test it, we run **npm run dev**. If we go to http://127.0.0.1:3000/ in our browser, we see the response message we had placed in the response.
+
+## **Routing with Express.js**
+
+We can start creating the routes that we want by using get('/path') to send the messages we want. In the previous example, we used send to send a string message, but generally, we use json with res.json({}).
+
+The route definition has the following structure:
+
+**app.METHOD(PATH, HANDLER)**
+
+Where:
+
+- app is an instance of Express.
+- METHOD is an HTTP request method.
+- PATH is a server access path.
+- HANDLER is the function that runs when the route is matched.
+
+## **RESTful API**
+REST: Representational State Transfer
+It is a convention that refers to web services through the HTTP protocol.
+
+**Methods:**
+
+* Get: Obtain
+* Put: Modify (modifies the previous data to the new one, eliminating the data that was not passed)
+* Patch: Update (updates only what is sent, without modifying what was not sent)
+* Post: Create
+* Delete: Remove
+
+## **GET: Receive parameters**
+
+One of the conventions of REST is that when we have an endpoint, we can define the entity and then the ID. For example, if we have tasks, the endpoint would be api.example.com/tasks/{id}/, and we would get that specific task.
+
+We can create a new route in which we request the ID. We should know that within the request, we have a property called params, which sends us all the parameters in an object. We can use destructuring to extract the necessary parameter by using const {id} = req.params. If we save that constant within the object we are returning, we can return that value in the HTML.
+
+Then we can do the same with two parameters. For this, we must note that within the same endpoint, we cannot have the same name for two parameters, that is, if we have categories/:id/products/:product, we cannot repeat id in both cases.
+
+## **GET: Query Parameters** 
+
+To perform specific behaviors in requests, we often use query parameters indicated in the URL as ?parameterName=value and &&parameterName2=value2. We use them for pagination, to limit the amount of data returned to the user, etc.
+
+As the parameters are optional, they will not be defined directly in the route. Instead, they come as parameters within our request. We can obtain these parameters from the query property of the request.
+
+As the parameters are optional, we use an if statement to check if the user used them.
+
+We can install a library that generates fake data:
+
+```bash
+npm i faker@5.5.3 -S
+```
+Or alternatively:
+
+```bash
+npm i @faker-js/faker
+```
+With this latest version, to use it, we need to require it in the following way:
+
+```javascript
+const { faker } = require('@faker-js/faker');
+```
+After installing it, we can import it into the index file, and we can create fake data to improve our queries. To add data to our product query, we can use a for loop with the desired iteration value (number of data). For each iteration, we push the data into an array called products, where we add the name, the price (in base 10), and an image.
+
+After having the data, we can do different queries, for example, ?size=8. In the route creation, we can tell it that if the query parameter with the number of products does not come, by default, it will send 8.
+
+To avoid problems with routes, we must place everything that is specific before what is dynamic. This means that if we have a route /filter, it will go before in the code than a route /:id. Otherwise, filter will be taken as a parameter, and therefore it will never enter that endpoint. 
+
+## **Separation of Concerns with express.Router** 
+
+This means that each piece of code should have a **single responsibility**. So far we have been doing all the routing in a single file, so we are not complying with this principle.
+
+The first step is to create a folder called **routes**. Then we create the product routes file, where we usually sign them, that is, we give them a camelcase or dot notation name that specifies what they refer to. In this case, we use **products.route.js.**
+
+We move the product routes to this new file. We must also import express and faker. As we will not have access to the application, we create a router.
+
+```javascript
+const router = express.Router()
+```
+This line of code is used to define an instance of router to handle routes in a web application.
+
+A **router** is a kind of mini application that only handles routes and middleware, and can be used to organize and modularize a larger web application.
+
+Therefore, router is an object that allows us to define the routes for our application, and associate them with the corresponding functions that will be executed when they are accessed.
+
+We must also know that since we are in the product routes file, it is not necessary to include the name in the routes.
+
+At the end of the file, we indicate that we want to export the router using:
+
+```javascript
+module.exports = router
+```
+
+We create another file called index.js, which will have the product route since in the previous file we were only placing the details. Here we will receive the **app** as a parameter for a function. The function will handle the detail that comes from the client. Finally, we export the function.
+
+Then we do the same for users, creating the **users.router.js** file.
+
+In the main index file (which is not in the routes folder, but at the beginning of our application), we must import the routes folder, where it is not necessary to include index.js as it is automatically handled by the system.
+
+## **POST: method for creating**
+
+Before starting with POST, it is important to know that generally routes begin with a versioning. Therefore, we have to place a master route that will control the versions, and from which all will start =>
+
+```javascript
+app.use('/api/v1', router);
+```
+
+As we are going to perform a POST, we must have a tool that emulates the sending, in this case I am going to use **Thunder Client**, but POSTMAN or Insomia can be used.
+
+Inside the products.router.js file, we create the route for the POST method. We create a constant **"body"** that will be responsible for receiving all the values.
+
+We must create a **middleware** to be able to receive the values that are sent to us as JSON
+
+```javascript
+app.use(express.json());
+```
+This is placed in the main index file.
+
+## **PUT, PATCH and DELETE** 
+
+If we are going to update values with **PUT**, we must send a unique identifier for that product in the route. But at the same time, we must bear in mind that in these cases it is also necessary to pass all fields, even if we only want to modify one. As an example, we can think that we want to modify the price, but if we do it with PUT we must pass name, detail, image, etc.
+
+For partial updates we use **PATCH**, which allows us to change only the desired field through the product identifier in this case. The route for PATCH is very similar to the route for POST.
+
+For **DELETE** we also have a similar behavior, receiving an id, but in this case it will not have a body.
+
+## **HTTP response status codes** 
+
+HTTP response status codes allow the client to know, as the name suggests, the status of the request made, so that they can determine whether a request has been completed successfully, had errors, or presented some issues during the process.
+
+So far, all our routes have returned the status code 200, but if we use POST to create a product, it should return 201. The way to add it is in the response we make to the client =>
+
+```js
+res.status(201).json({ message: "Created successfully" ..
+```
+
+When we are asked for a product that is not on the list, we can send a 404. We do this in the GET route, through a conditional statement. We must remember that all parameters come as a string, so we must write it that way in the conditional.
+
+### **Introduction to services: creating first service**
+
+So far we have only worked on routing, but now we will see the business logic, which is where the services are. This comes from an architecture, which is defined by layers. The smallest layer is **entities**, then **use cases** (services) where everything related to business logic is. Above that are the **controllers**, which provide access, where we find all the routing and middlewares.
+
+To separate the services, which is the business logic, from the routing, we start by creating a folder called services. Then we create a file inside it for products. We are going to start using object-oriented programming, we need to manage everything that is related to products, that is, create, edit, etc.
+
+We create the **ProductsService** class where we are going to place all the functions that refer to the different services (business logic). For now, we are going to work with in-memory data, we will not connect it to a database, it is just to understand the logic. That is why we are going to create a method that allows us to generate data from faker. Every time we generate an instance of the product, it will generate 100 data, since we built the method with that value.
+
+For the find method, the return is very simple, as it returns all the values. We can test it by importing that productsService in the router. After importing it, we create an instance. Inside the route, we can use the instance to call the desired method =>
+
+```js
+const products = service.find();
+```
+
+To find a specific product we can do the same, but keeping in mind that we are looking for it by an id, and in this case our fake database did not have an id, so we must add it.
+
+### **Creating, Editing, and Deleting from the Service**
+
+We are using a type of in-memory database persistence, which means that if we close the terminal and run the program again, the data we had will not exist. They only exist if we keep the program running.
+
+For **create**, we have to create an ID with faker, but for the other fields, the client will provide them. We use the spread operator to concatenate the values received from the client. The **spread syntax** or **spread operator** in JavaScript (…) allows us to quickly copy all or part of an existing array or object into another array or object.
+
+js
+Copy code
+const numbersOne = [1, 2, 3];
+const numbersTwo = [4, 5, 6];
+const numbersCombined = [...numbersOne, ...numbersTwo];
+After having the new product, we push it to add it to the array of products. Finally, we return the created product. Then in the router, we receive the data from the client, use the method to create a new product, and respond with that created product.
+
+For **editing** or **updating**, the first thing is to find the index of the product we want to update and then with a conditional ask if the index exists (findIndex returns -1 if the index is not found). In this case, we also use the **spread operator** to concatenate the values we had from the product with the new ones. These values we pass will overwrite the values of the object where the key is the same. In other cases, or if we don't send the key, the values won't change.
+
+With **delete**, the logic is quite similar to update, as we first need to find which product we want to delete. Then we use the **splice** method of arrays to remove that product from our array.
+
+### **Async Await and Error Handling**
+
+In this case, as we are working with an in-memory array, the process is synchronous, meaning we don't need to wait for any process to receive the result. In reality, this should be an asynchronous process, as that is how services work.
+
+We need to add **async** to each of the methods. This way, NODE will treat them asynchronously as a promise. We must also remember to use **await.**
+
+In the routers, we also need to add **async** and **await.**
+
+Let's simulate a delay when we get the products. To do this, we go to the find method in services and add a promise. We set a waiting time of 5 seconds to return the information.
+
+When we handle everything asynchronously, it allows us to handle errors with **try-catch.** When we updated the information, if the ID was not found, it would throw an error. Now we can use **try-catch**, where we try to find the ID and respond with a JSON, but if there is an error in any of the lines, we catch it and respond with an error message.
+
+### **Middlewares**
+
+These are located between the request and the response, where they allow us to process logic REQUEST --> MIDDLEWARE --> RESPONSE. They can be used globally, for example by capturing all the errors in our application, or uniquely for each endpoint. They can work sequentially, meaning we can have multiple middlewares one after another REQUEST --> MIDDLEWARE --> MIDDLEWARE --> MIDDLEWARE --> RESPONSE. For example, the first middleware could check if we have authentication logic, then in the second middleware we make another check, and so on, as needed. Therefore, a middleware may block at some point, as a middleware that validates permissions, if the correct ones are not sent, does not allow to continue to the next middleware.
+
+The logic is within our function that has a request and response as parameters, we also add a next. This is the one that allows us to continue.
+
+Example:
+
+```js
+function (req, res, next) {
+  if(something) {
+    res.send('end')
+  } else {
+    next();
+  }
+}
+```
+There are also error-type middlewares, where the first parameter for the function is the error.
+Example:
+
+```js
+function (error, req, res, next) {
+  if(error) {
+    res.status(500).json({error}); 
+  } else {
+    next();
+  }
+}
+``` 
+
+Use cases:
+
+* They work like pipes: the output of one is the input of another.
+* Validate data.
+* Capture errors.
+* Validate permissions.
+* Control access.
+
+### **Middleware for HttpErrors** 
+
+We are going to implement an error middleware (global, for the whole application). We are going to create a folder just for middlewares, and inside this folder we create a file for the error handler.
+
+We build a function **logError** where we send the error, request, response, and next as parameters. In this case, we only print the error in the console, and then show the error on the server so that we can monitor it **next(err)**;. It's important to know that we are running it as an error middleware, if we don't send anything then we execute it as a normal one.
+
+Then we will create another function **errorHandler**, which will detect an error, but we will create a format to be able to return it to our client. This changes that we don't want to continue to our next middleware, if there is an error that should be the point where it ends. So, if there is an error, we send the response with a status 500. We also send a json with the error message and include a property called **stack**. This property contains a string that describes the stack trace of function calls that were in progress when the error exception occurred. This information is useful for debugging errors as it can help identify the source of the error and the functions involved in the process. However, this information should not be publicly exposed in a production application as it can be maliciously used to find vulnerabilities in the system.
+
+We must remember that even if we are not using the next, we must include it since it is the way it detects that it is an error middleware. Therefore, we must include the 4 parameters in the function.
+
+We should place the error middleware after defining the routing in the application's index. So, after importing them with require, we add the following:
+
+```js
+app.use(logErrors);
+app.use(errorHandler);
+```
+
+Take into consideration in which order they are being executed, that is, in the order in which we place them in the lines above, will be the order in which they will be executed.
+
+We must explicitly catch the error from the routing and then execute the error middleware. Therefore, in the get product routing, we add next in the parameters of the asynchronous function. So, we place a try-catch block, where we explicitly place in the catch, that if there is an error, we execute the error middleware, with the next. We intentionally place a function that does not exist getTotal, to generate an error in the findOne method of products.
+
+When trying to get a product from Thunder Client, we get the following error message:
+
+```bash
+{
+  "message": "this.getTotal is not a function",
+  "stack": "TypeError: this.getTotal is not a function\n...
+``` 
+
+### **Error handling with Boom**
+
+We install the Boom library with the following command:
+
+```bash
+npm i @hapi/boom
+```
+We require it in the product services. Now we will be able to handle errors in a friendlier way. In every place where we have an error, we can return the corresponding status code with the methods that this library provides. We can also send the messages we want.
+
+Boom has a special format for error handling. Therefore, we can create a middleware that is specific to the Boom library. When creating this middleware, we use a property that is created when the error is of type Boom (isBoom). We add to the middleware that if the error is not of type Boom, it should execute a normal error middleware.
+
+After adding this middleware to the index, we can search for a product that does not exist to test if it throws a 404 error.
+
+We can also create a new error by imagining that there are products that cannot be viewed. Therefore, we will add a property to the method that generates products that indicates if the product is blocked or not. This will be a boolean, which will return true or false. Then, when we search for a product, we can add an if statement that asks if it is blocked. If it is true, we send a Boom error of type conflict.
+
+Therefore, if we use Thunder Client to bring all the products, we can see which ones have the blocked property. And if we want to search for one that is true, the error we created will appear.
+
+### **Data validation with Joi**
+
+Another use case for middlewares is to validate the data sent by clients, such as dates, URLs, and ensuring that when creating a product, all data is sent, etc.
+
+To do this, we will install the Joi library with the following command:
+
+```bash
+npm i joi
+```
+
+We will create a folder where we will place the **schemas** (also known as DTO = data transfer object), which are the checks for our objects (products, etc.). Each schema will have, for each of its fields, the checks that we want. We can create a schema for creating the object, for updating it, for when we make a GET request.
+
+To use them, we will create a middleware to which we can send our schemas to check the fields. Therefore, we create a new file called validator.handler in the middleware folder. Inside, we create the function to validate the schemas, which receives the schema and the property as parameters. Here, a middleware is created dynamically (using closure). If the schema is received, we validate the information we want to validate with schema.validate(). The information comes from data, which comes from a request (body, params, query). If there is an error (it does not comply with the validation), then a Boom error is sent. If there is no error, the service continues (next()).
+
+### **Try out our endpoints** 
+
+We are going to use the validations we created in our endpoints. The validations we created are middleware, and we can concatenate as many as we want. Therefore, before fetching a product, we are going to place the validatorHandler middleware. In this case, since it is for getting a product, we must pass the getProductSchema as a parameter. The second parameter is where the information is coming from, in this case, it is from the params.
+
+In the case of an endpoint like patch, we can add more validators, for example, to first validate that we are trying to get an existing product, and then validate that the parameters we are passing in the body to modify are correct.
+
+So far, when we create a product and have multiple errors, it sends us the first error it finds. That is, if we have the name and price wrong, it sends us that the name is wrong, and only after correcting it, it tells us that the price is wrong. This can be annoying. We can modify this behavior and have it send us all error messages from the beginning. We add to the validatorHandler that the **abortEarly** parameter is false.
+
+### **List of most popular middlewares with Express**
+
+Here is a list of the most popular middlewares in Express:
+
+**CORS**
+
+Middleware to enable CORS (Cross-origin resource sharing) in our routes or application. http://expressjs.com/en/resources/middleware/cors.html
+
+**Morg**an
+
+An HTTP request logger for Node.js. http://expressjs.com/en/resources/middleware/morgan.html
+
+**Helmet**
+
+Helmet helps us protect our Express applications by setting various HTTP headers. It's not a silver bullet, but it can help! https://github.com/helmetjs/helmet
+
+**Express Debug**
+
+Allows us to debug our Express applications using a toolbar on the page when we are developing them. https://github.com/devoidfury/express-debug
+
+**Express Slash**
+
+This middleware allows us to avoid worrying about writing routes with or without a trailing slash. https://github.com/ericf/express-slash
+
+**Passport**
+
+Passport is middleware that allows us to set up different authentication strategies for our applications. https://github.com/jaredhanson/passport
+
+You can find more popular middlewares at the following link: http://expressjs.com/en/resources/middleware.html
+
+### **Considerations for production**
+
+CORS (Cross-Origin Resource Sharing) is a mechanism that allows web browsers and other web clients to access resources from a server that is located on a different origin than the origin from which the original resource was requested. Modern browsers implement security measures to prevent HTTP requests from a different origin than the original resource, unless the server from which the resource is requested explicitly specifies that it allows the request.
+
+To allow web clients to access resources from a different origin, the server can send CORS headers in its HTTP response. These headers specify which origins can access the resources and what types of HTTP requests are allowed. The server can also specify other details of the CORS policy, such as the maximum duration of preflight requests and the authentication credentials allowed in requests.
+
+In summary, CORS is a mechanism that allows web browsers and other web clients to access resources from a server that is located on a different origin than the origin from which the original resource was requested, as long as the server explicitly allows access by sending appropriate CORS headers.
+
+### **CORS issue**
+To enable CORS on all requests in Express, the cors middleware can be used. This middleware allows CORS to be configured and enabled on all server routes.
+
+To use the cors middleware in Express, the cors package must first be installed:
+
+```bash
+npm install cors
+```
+Then, the middleware can be added to the main application file:
+
+```js
+const cors = require('cors');
+```
+
+app.use(cors());
+In this way, CORS will be enabled on all application routes and access will be allowed from any origin. This may or may not be advisable.
+
+If access restriction is desired, an array called a whitelist can be created, which contains the domains that will be allowed. These can be placed in a constant called options, which will be passed as a parameter to cors.
 
 [Go up](#top)
 
@@ -19,12 +410,12 @@
 
 ## Spanish
  
-## Tecnologías utilizadas: JAVASCRIPT, HTML, CSS
+## Tecnologías utilizadas: Node
 
 ## Resumen
 
 Utilizando Express.js haremos un proyecto de una tienda virtual, con productos, categorías, etc. 
-¿Qué es Express.js? 
+**¿Qué es Express.js?** 
 Es un microframework que corre en Node. 
 
 ## **Configuración inicial**
@@ -396,5 +787,5 @@ De esta manera, se habilitará CORS en todas las rutas de la aplicación y se pe
 
 En el caso de querer restrignir el acceso, podemos crear un array que llamamos whitelist, el cual son los dominios que permitiremos. Estos los colocamos en una constante que llamamos options, que es lo que enviaremos como parametro a cors. 
 
-
+[Go up](#top)
 
