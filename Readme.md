@@ -336,6 +336,65 @@ Vamos a crear una carpetas donde colocaremos los **schemas** (tamnién los podem
 Para utlizarlos vamos a crear un middleware, al cual podemos enviar nuestros schemas, para hacer la comprobación de los campos. Por lo tanto creamos en la carpeta middleware, un nuevo archivo llamado validator.handler. Dentro creamos la funcion para validar los schemas, la cual recibe por parametro el schema, y la propiedad. Aquí se crea un middleware de forma dinámica (se usa closure).
 Si se recibe el schema, con schema.validate() se valida la información que se desea validar. La información viene de data, la cual viene de un request (body, params, query). Si hay un error (no cumple con la validación), entonces se envía un error de tipo boom. Si no hay error, el servicio sigue (next()). 
 
+### **Probando nuestros endpoints** 
+
+Vamos a utilizar las validaciones que creamos, en los endpoints. Las validaciones que creamos son middleware, y podemos concatenar la cantidad que queramos, por lo que antes de traer un producto, vamos a colocar el middleware de validatorHandler. En este caso como es para obtener un producto, debemos de pasarle como parametro el schema getProductSchema. Y el segundo parametro, es de donde viene la información, en este caso es por params. 
+
+En el caso de un endpoint como patch, podemos poner más validators, por ejemplo que valide primero que estamos tratando de obtener un producto que existe, y luego que los parametros que le estamos pasando en el body para modificar son los correctos.  
+
+Hasta ahora, cuando creamos un producto y tenemos varios errores, nos envía el primer error que encuentra. Es decir, si tenemos mal el nombre y el precio, nos envia que el nombre está mal, y recién después de corregirlo, nos dice que el precio está mal. Por lo que puede ser molesto. Podemos hacer una modificación de esto, y que nos mande todos los mensajes de error desde el primer momento. Agregamos en el validatorHandler, que el **abortEarly** sea false. 
+
+
+### **Lista de middleware más populares con express** 
+
+A continuación una lista de los middlewares más populares en Express.
+
+**CORS**
+Middleware para habilitar CORS (Cross-origin resource sharing) en nuestras rutas o aplicación. http://expressjs.com/en/resources/middleware/cors.html
+
+**Morgan**
+Un logger de solicitudes HTTP para Node.js. http://expressjs.com/en/resources/middleware/morgan.html
+
+**Helmet**
+Helmet nos ayuda a proteger nuestras aplicaciones Express configurando varios encabezados HTTP. ¡No es a prueba de balas de plata, pero puede ayudar! https://github.com/helmetjs/helmet
+
+**Express Debug**
+Nos permite hacer debugging de nuestras aplicaciones en Express mediante el uso de un toolbar en la pagina cuando las estamos desarrollando. https://github.com/devoidfury/express-debug
+
+**Express Slash**
+Este middleware nos permite evitar preocuparnos por escribir las rutas con o sin slash al final de ellas. https://github.com/ericf/express-slash
+
+**Passport**
+Passport es un middleware que nos permite establecer diferentes estrategias de autenticación a nuestras aplicaciones. https://github.com/jaredhanson/passport
+
+Puedes encontrar más middlewares populares en el siguiente enlace: http://expressjs.com/en/resources/middleware.html
+
+
+### **Consideraciones para producción**
+
+CORS (Cross-Origin Resource Sharing) es un mecanismo que permite a los navegadores web y otros clientes web acceder a recursos de un servidor que se encuentra en un origen diferente al origen desde el cual se solicitó el recurso original. Los navegadores modernos implementan medidas de seguridad para prevenir solicitudes HTTP desde un origen diferente al del recurso original, a menos que el servidor al que se solicita el recurso especifique explícitamente que permita la solicitud.
+
+Para permitir que los clientes web accedan a recursos desde un origen diferente, el servidor puede enviar encabezados CORS en su respuesta HTTP. Estos encabezados especifican qué orígenes pueden acceder a los recursos y qué tipos de solicitudes HTTP se permiten. El servidor también puede especificar otros detalles de la política CORS, como la duración máxima de las solicitudes preflight y las credenciales de autenticación que se permiten en las solicitudes.
+
+En resumen, CORS es un mecanismo que permite a los navegadores web y otros clientes web acceder a recursos de un servidor que se encuentra en un origen diferente al origen desde el cual se solicitó el recurso original, siempre y cuando el servidor permita explícitamente el acceso mediante el envío de encabezados CORS adecuados. 
+
+### **Problema de CORS**
+
+Para habilitar CORS en todos los requests en Express, se puede utilizar el middleware cors. Este middleware permite configurar y habilitar CORS en todas las rutas del servidor.
+
+Para usar el middleware cors en Express, se debe instalar primero el paquete cors:
+```bash
+npm install cors
+```
+Luego, se puede agregar el middleware en el archivo principal de la aplicación: 
+```js
+const cors = require('cors');
+
+app.use(cors());
+``` 
+De esta manera, se habilitará CORS en todas las rutas de la aplicación y se permitirá el acceso desde cualquier origen. Esto puede o no ser aconsejable. 
+
+En el caso de querer restrignir el acceso, podemos crear un array que llamamos whitelist, el cual son los dominios que permitiremos. Estos los colocamos en una constante que llamamos options, que es lo que enviaremos como parametro a cors. 
 
 
 
