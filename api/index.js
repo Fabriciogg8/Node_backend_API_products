@@ -5,7 +5,7 @@ const routerApi = require("./routes")
 const { logErrors, errorHandler, boomErorHandler } = require('./middlewares/error.handler')
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -21,7 +21,7 @@ const options = {
 }
 app.use(cors(options));
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send("Hola que tal, primer ruta con NODE y Express")
 })
 
